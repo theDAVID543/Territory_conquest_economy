@@ -23,6 +23,8 @@ public final class Territory_conquest_economy extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         instance = this;
+        Bukkit.getPluginManager().registerEvents(new eventListener(), this);
+        ConfigReader.createCustomConfig();
         if (!setupEconomy() ) {
             log.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
@@ -33,7 +35,6 @@ public final class Territory_conquest_economy extends JavaPlugin {
     }
     @Override
     public void onLoad() {
-        saveDefaultConfig();
         this.myPlugin = this;
         this.landsAPI = getLandsAPI();
     }
