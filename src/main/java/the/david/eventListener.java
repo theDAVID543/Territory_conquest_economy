@@ -23,13 +23,13 @@ public class eventListener implements Listener {
                 ConfigReader.setLandExpConfig(landsAPI.getArea(e.getPlayer().getLocation()).getLand().getId(), e.getExperienceOrb().getExperience());
             }
         }
-        while(!Objects.equal(ConfigReader.playerExpGot(e.getPlayer().getUniqueId()), null) && ConfigReader.playerExpGot(e.getPlayer().getUniqueId()) >= 5){
-            Territory_conquest_economy.getEconomy().depositPlayer(e.getPlayer(),0.01);
-            ConfigReader.setPlayerExpConfig(e.getPlayer().getUniqueId(), ConfigReader.playerExpGot(e.getPlayer().getUniqueId()) - 5);
+        while(!Objects.equal(ConfigReader.playerExpGot(e.getPlayer().getUniqueId()), null) && ConfigReader.playerExpGot(e.getPlayer().getUniqueId()) >= 25){
+            Territory_conquest_economy.getEconomy().depositPlayer(e.getPlayer(),0.1);
+            ConfigReader.setPlayerExpConfig(e.getPlayer().getUniqueId(), ConfigReader.playerExpGot(e.getPlayer().getUniqueId()) - 25);
         }
-        while(!Objects.equal(ConfigReader.landExpGot(landsAPI.getArea(e.getPlayer().getLocation()).getLand().getId()), null) && ConfigReader.landExpGot(landsAPI.getArea(e.getPlayer().getLocation()).getLand().getId()) >= 25 - landsAPI.getArea(e.getPlayer().getLocation()).getLand().getLevel().getPosition()){
-            landsAPI.getArea(e.getPlayer().getLocation()).getLand().addBalance(0.01);
-            ConfigReader.setLandExpConfig(landsAPI.getArea(e.getPlayer().getLocation()).getLand().getId(), ConfigReader.landExpGot(landsAPI.getArea(e.getPlayer().getLocation()).getLand().getId()) - 25 - landsAPI.getArea(e.getPlayer().getLocation()).getLand().getLevel().getPosition() + 1);
+        while(!Objects.equal(ConfigReader.landExpGot(landsAPI.getArea(e.getPlayer().getLocation()).getLand().getId()), null) && ConfigReader.landExpGot(landsAPI.getArea(e.getPlayer().getLocation()).getLand().getId()) >= 125 - ((landsAPI.getArea(e.getPlayer().getLocation()).getLand().getLevel().getPosition() + 1) * 10 )){
+            landsAPI.getArea(e.getPlayer().getLocation()).getLand().addBalance(0.1);
+            ConfigReader.setLandExpConfig(landsAPI.getArea(e.getPlayer().getLocation()).getLand().getId(), ConfigReader.landExpGot(landsAPI.getArea(e.getPlayer().getLocation()).getLand().getId()) - 125 - ((landsAPI.getArea(e.getPlayer().getLocation()).getLand().getLevel().getPosition() + 1) * 10 ) );
             landsAPI.getArea(e.getPlayer().getLocation()).getLand();
         }
     }
