@@ -1,0 +1,4 @@
+name: territory-conquest-economy
+version: '${project.version}'
+main: the.david.Territory_conquest_economy
+api-version: 1.19
