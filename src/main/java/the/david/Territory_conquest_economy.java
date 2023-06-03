@@ -1,5 +1,12 @@
 package the.david;
 
+import fr.maxlego08.zauctionhouse.api.AuctionManager;
+import fr.maxlego08.zauctionhouse.api.ConvertManager;
+import fr.maxlego08.zauctionhouse.api.blacklist.IBlacklistManager;
+import fr.maxlego08.zauctionhouse.api.category.CategoryManager;
+import fr.maxlego08.zauctionhouse.api.filter.FilterManager;
+import fr.maxlego08.zauctionhouse.api.inventory.InventoryManager;
+import fr.maxlego08.zauctionhouse.api.transaction.TransactionManager;
 import me.angeschossen.lands.api.LandsIntegration;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;

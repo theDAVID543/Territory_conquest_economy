@@ -2,13 +2,11 @@ package the.david;
 
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
 import com.google.common.base.Objects;
+import fr.maxlego08.zauctionhouse.api.event.events.AuctionSellEvent;
 import me.angeschossen.lands.api.LandsIntegration;
-import org.bukkit.Material;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class eventListener implements Listener {
     private LandsIntegration landsAPI = Territory_conquest_economy.landsAPI;
