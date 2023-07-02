@@ -1,24 +1,22 @@
 package the.david;
 
-import fr.maxlego08.zauctionhouse.api.AuctionManager;
-import fr.maxlego08.zauctionhouse.api.ConvertManager;
-import fr.maxlego08.zauctionhouse.api.blacklist.IBlacklistManager;
-import fr.maxlego08.zauctionhouse.api.category.CategoryManager;
-import fr.maxlego08.zauctionhouse.api.filter.FilterManager;
-import fr.maxlego08.zauctionhouse.api.inventory.InventoryManager;
-import fr.maxlego08.zauctionhouse.api.transaction.TransactionManager;
 import me.angeschossen.lands.api.LandsIntegration;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.logging.Logger;
 
-public final class Territory_conquest_economy extends JavaPlugin {
+public final class Territory_conquest_economy extends JavaPlugin implements @NotNull Listener {
     public static LandsIntegration landsAPI;
     private Plugin myPlugin;
     public static JavaPlugin instance;
@@ -26,11 +24,13 @@ public final class Territory_conquest_economy extends JavaPlugin {
     private static Economy econ = null;
     private static Permission perms = null;
     private static Chat chat = null;
+    public static long oldDayTime;
     @Override
     public void onEnable() {
         // Plugin startup logic
         instance = this;
         Bukkit.getPluginManager().registerEvents(new eventListener(), this);
+        Bukkit.getPluginManager().registerEvents(new quest(), this);
         ConfigReader.createCustomConfig();
         if (!setupEconomy() ) {
             log.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
@@ -38,8 +38,37 @@ public final class Territory_conquest_economy extends JavaPlugin {
             return;
         }
         setupPermissions();
-        setupChat();
+        if (Bukkit.getPluginCommand("tce") != null) {
+            Bukkit.getPluginCommand("tce").setExecutor(new commandHandler());
+        }
+        Objects.requireNonNull(Bukkit.getPluginCommand("tce")).setTabCompleter(new commandHandler());
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            /*
+             * We register the EventListener here, when PlaceholderAPI is installed.
+             * Since all events are in the main class (this class), we simply use "this"
+             */
+            new placeholderRegister().register();
+            Bukkit.getPluginManager().registerEvents(this, this);
+        } else {
+            /*
+             * We inform about the fact that PlaceholderAPI isn't installed and then
+             * disable this plugin to prevent issues.
+             */
+            getLogger().info("Could not find PlaceholderAPI! This plugin is required.");
+            Bukkit.getPluginManager().disablePlugin(this);
+        }
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                points.calculateMaxMoney();
+                if(Bukkit.getWorld("world").getTime() < oldDayTime){
+                    points.calculatePoint();
+                }
+                oldDayTime = Bukkit.getWorld("world").getTime();
+            }
+        }.runTaskTimer(this,0,20);
     }
+
     @Override
     public void onLoad() {
         this.myPlugin = this;
@@ -47,6 +76,7 @@ public final class Territory_conquest_economy extends JavaPlugin {
     }
     @Override
     public void onDisable() {
+        new placeholderRegister().unregister();
         // Plugin shutdown logic
     }
     private LandsIntegration getLandsAPI(){
