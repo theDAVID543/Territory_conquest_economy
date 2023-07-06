@@ -1,13 +1,11 @@
 package the.david;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import net.kyori.adventure.translation.TranslationRegistry;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -189,7 +187,71 @@ public class placeholderRegister extends PlaceholderExpansion implements Listene
             entry("entity.minecraft.zombie", "殭屍"),
             entry("entity.minecraft.zombie_horse", "殭屍馬"),
             entry("entity.minecraft.zombie_villager", "殭屍村民"),
-            entry("entity.minecraft.zombified_piglin", "殭屍化豬布林")
+            entry("entity.minecraft.zombified_piglin", "殭屍化豬布林"),
+            entry("biome.minecraft.badlands", "惡地"),
+            entry("biome.minecraft.bamboo_jungle", "竹林"),
+            entry("biome.minecraft.basalt_deltas", "玄武岩三角洲"),
+            entry("biome.minecraft.beach", "沙灘"),
+            entry("biome.minecraft.birch_forest", "樺木森林"),
+            entry("biome.minecraft.cherry_grove", "櫻花樹林"),
+            entry("biome.minecraft.cold_ocean", "寒冷海洋"),
+            entry("biome.minecraft.crimson_forest", "緋紅森林"),
+            entry("biome.minecraft.dark_forest", "黑森林"),
+            entry("biome.minecraft.deep_cold_ocean", "寒冷深海"),
+            entry("biome.minecraft.deep_dark", "深淵"),
+            entry("biome.minecraft.deep_frozen_ocean", "寒凍深海"),
+            entry("biome.minecraft.deep_lukewarm_ocean", "溫和深海"),
+            entry("biome.minecraft.deep_ocean", "深海"),
+            entry("biome.minecraft.desert", "沙漠"),
+            entry("biome.minecraft.dripstone_caves", "鐘乳石洞窟"),
+            entry("biome.minecraft.end_barrens", "終界荒地"),
+            entry("biome.minecraft.end_highlands", "終界高地"),
+            entry("biome.minecraft.end_midlands", "終界平地"),
+            entry("biome.minecraft.eroded_badlands", "侵蝕惡地"),
+            entry("biome.minecraft.flower_forest", "繁花森林"),
+            entry("biome.minecraft.forest", "森林"),
+            entry("biome.minecraft.frozen_ocean", "寒凍海洋"),
+            entry("biome.minecraft.frozen_peaks", "霜凍山峰"),
+            entry("biome.minecraft.frozen_river", "寒凍河流"),
+            entry("biome.minecraft.grove", "雪林"),
+            entry("biome.minecraft.ice_spikes", "冰刺"),
+            entry("biome.minecraft.jagged_peaks", "尖峭山峰"),
+            entry("biome.minecraft.jungle", "叢林"),
+            entry("biome.minecraft.lukewarm_ocean", "溫和海洋"),
+            entry("biome.minecraft.lush_caves", "蒼鬱洞窟"),
+            entry("biome.minecraft.mangrove_swamp", "紅樹林沼澤"),
+            entry("biome.minecraft.meadow", "草甸"),
+            entry("biome.minecraft.mushroom_fields", "蘑菇地"),
+            entry("biome.minecraft.nether_wastes", "地獄荒原"),
+            entry("biome.minecraft.ocean", "海洋"),
+            entry("biome.minecraft.old_growth_birch_forest", "原生樺木森林"),
+            entry("biome.minecraft.old_growth_pine_taiga", "原生松木針葉林"),
+            entry("biome.minecraft.old_growth_spruce_taiga", "原生杉木針葉林"),
+            entry("biome.minecraft.plains", "平原"),
+            entry("biome.minecraft.river", "河流"),
+            entry("biome.minecraft.savanna", "莽原"),
+            entry("biome.minecraft.savanna_plateau", "莽原高地"),
+            entry("biome.minecraft.small_end_islands", "終界小島"),
+            entry("biome.minecraft.snowy_beach", "冰雪沙灘"),
+            entry("biome.minecraft.snowy_plains", "雪原"),
+            entry("biome.minecraft.snowy_slopes", "雪坡"),
+            entry("biome.minecraft.snowy_taiga", "冰雪針葉林"),
+            entry("biome.minecraft.soul_sand_valley", "靈魂砂谷"),
+            entry("biome.minecraft.sparse_jungle", "稀疏叢林"),
+            entry("biome.minecraft.stony_peaks", "裸岩山峰"),
+            entry("biome.minecraft.stony_shore", "石岸"),
+            entry("biome.minecraft.sunflower_plains", "向日葵平原"),
+            entry("biome.minecraft.swamp", "沼澤"),
+            entry("biome.minecraft.taiga", "針葉林"),
+            entry("biome.minecraft.the_end", "終界"),
+            entry("biome.minecraft.the_void", "虛空"),
+            entry("biome.minecraft.warm_ocean", "溫暖海洋"),
+            entry("biome.minecraft.warped_forest", "扭曲森林"),
+            entry("biome.minecraft.windswept_forest", "風蝕森林"),
+            entry("biome.minecraft.windswept_gravelly_hills", "風蝕礫質丘陵"),
+            entry("biome.minecraft.windswept_hills", "風蝕丘陵"),
+            entry("biome.minecraft.windswept_savanna", "風蝕莽原"),
+            entry("biome.minecraft.wooded_badlands", "疏林惡地")
     );
     @Override
     public @NotNull String getIdentifier() {
@@ -211,34 +273,31 @@ public class placeholderRegister extends PlaceholderExpansion implements Listene
     }
     @Override
     public String onRequest(OfflinePlayer player, String params) {
-        if(params.equalsIgnoreCase("points")){
-            DecimalFormat df = new DecimalFormat("#.##");
-            return df.format(points.getPoint(player.getUniqueId()));
-        }
-        if(params.equalsIgnoreCase("activity")){
-            DecimalFormat df = new DecimalFormat("#.##");
-            return df.format(points.getActivity(player.getUniqueId()));
-        }
-        if(params.equalsIgnoreCase("quest")){
-            if(!Objects.equals(quest.todayQuest,null)){
-                if(quest.todayQuest.equals("killEntity")){
-                    return "&4殺死生物: &c" + translation.get(quest.todayType.translationKey());
-                }else if(quest.todayQuest.equals("trade")){
-                    return "&a與村民 &2" + translation.get(quest.todayVillagerProfession.translationKey()) + " &a交易";
-                }else if(quest.todayQuest.equals("mineOre")){
-                    return "&8&l挖掘礦物";
+        String p = params.toLowerCase();
+        DecimalFormat df = new DecimalFormat("#.##");
+        switch (p){
+            case "points":
+                return df.format(points.getPoint(player.getUniqueId()));
+            case "questpoints":
+                return df.format(questPoints.getPoint(player.getUniqueId()));
+            case "activity":
+                return df.format(points.getActivity(player.getUniqueId()));
+            case "quest":
+                if(!Objects.equals(quest.todayQuest,null)){
+                    switch (quest.todayQuest) {
+                        case "killEntity":
+                            return "&4殺死生物: &c" + translation.get(quest.todayType.translationKey());
+                        case "trade":
+                            return "&a與村民 &#85590e" + translation.get(quest.todayVillagerProfession.translationKey()) + " &a交易";
+                        case "mineOre":
+                            return "&8&l挖掘礦物";
+                        case "exploreBiome":
+                            return "§e&l探索生態域";
+                    }
+                }else{
+                    return null;
                 }
-            }else{
-                return null;
-            }
         }
-        if(params.equalsIgnoreCase("questEntity")){
-            if(!Objects.equals(quest.todayQuest,null)){
-                return translation.get(quest.todayType.translationKey());
-            }
-            return null;
-        }
-
         return null; // Placeholder is unknown by the Expansion
     }
 }

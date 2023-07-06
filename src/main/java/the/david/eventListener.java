@@ -1,7 +1,6 @@
 package the.david;
 
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
-import com.google.common.base.Objects;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -15,15 +14,8 @@ public class eventListener implements Listener {
     @EventHandler
     public void onPickExpOrb(PlayerPickupExperienceEvent e){
         if(e.getExperienceOrb().getExperience() > 0 && !e.isCancelled()){
-            if(!Objects.equal(ConfigReader.playerExpGot(e.getPlayer().getUniqueId()), null)){
-                ConfigReader.setPlayerExpConfig(e.getPlayer().getUniqueId(), e.getExperienceOrb().getExperience() + ConfigReader.playerExpGot(e.getPlayer().getUniqueId()));
-            }else{
-                ConfigReader.setPlayerExpConfig(e.getPlayer().getUniqueId(), e.getExperienceOrb().getExperience());
-            }
-            while(!Objects.equal(ConfigReader.playerExpGot(e.getPlayer().getUniqueId()), null) &&  ConfigReader.playerExpGot(e.getPlayer().getUniqueId()) >= 5){
-//                Territory_conquest_economy.getEconomy().depositPlayer(e.getPlayer(),0.01);
-                points.addPoint(e.getPlayer().getUniqueId(), 0.01d);
-                ConfigReader.setPlayerExpConfig(e.getPlayer().getUniqueId(), ConfigReader.playerExpGot(e.getPlayer().getUniqueId()) - 5);
+            for(int exps = e.getExperienceOrb().getExperience(); exps > 0; exps--){
+                points.addPoint(e.getPlayer().getUniqueId(), 1d);
             }
         }
     }
@@ -44,7 +36,9 @@ public class eventListener implements Listener {
             Territory_conquest_economy.getEconomy().withdrawPlayer(e.getPlayer(), giveMoney);
             Territory_conquest_economy.getEconomy().depositPlayer(e.getPlayer().getKiller(), giveMoney* 0.9925);
             points.addPoint(e.getPlayer().getKiller().getUniqueId(), points.getPoint(e.getPlayer().getUniqueId()));
+            questPoints.addPoint(e.getPlayer().getKiller().getUniqueId(), questPoints.getPoint(e.getPlayer().getUniqueId()));
         }
         points.clearPoint(e.getPlayer().getUniqueId());
+        questPoints.clearPoint(e.getPlayer().getUniqueId());
     }
 }

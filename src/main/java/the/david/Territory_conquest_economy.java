@@ -31,7 +31,6 @@ public final class Territory_conquest_economy extends JavaPlugin implements @Not
         instance = this;
         Bukkit.getPluginManager().registerEvents(new eventListener(), this);
         Bukkit.getPluginManager().registerEvents(new quest(), this);
-        ConfigReader.createCustomConfig();
         if (!setupEconomy() ) {
             log.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
             getServer().getPluginManager().disablePlugin(this);
@@ -60,9 +59,15 @@ public final class Territory_conquest_economy extends JavaPlugin implements @Not
         new BukkitRunnable() {
             @Override
             public void run() {
-                points.calculateMaxMoney();
+                points.calculatePointsMaxMoney();
+                questPoints.calculateQuestPointsMaxMoney();
                 if(Bukkit.getWorld("world").getTime() < oldDayTime){
                     points.calculatePoint();
+                    questPoints.calculatePoint();
+                    quest.randomQuest();
+                }
+                if(Objects.equals(quest.todayQuest,null)){
+                    quest.randomQuest();
                 }
                 oldDayTime = Bukkit.getWorld("world").getTime();
             }

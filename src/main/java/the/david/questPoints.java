@@ -17,36 +17,36 @@ import java.util.UUID;
 
 import static java.lang.Math.pow;
 
-public final class points {
+public final class questPoints {
     private static final Economy economy = Territory_conquest_economy.getEconomy();
     private static final LandsIntegration landsAPI = Territory_conquest_economy.landsAPI;
     private static final Map<UUID,Float> activity = new HashMap<>();
-    private static final Map<UUID,Double> playerPoints = new HashMap<>();
-    public static Double maxMoney = 0.0;
+    private static final Map<UUID,Double> playerQuestPoints = new HashMap<>();
+    private static Double maxMoney = 0.0;
     public static Double getPoint(UUID uuid){
-        if(!Objects.equals(playerPoints.get(uuid),null)){
-            return playerPoints.get(uuid);
+        if(!Objects.equals(playerQuestPoints.get(uuid),null)){
+            return playerQuestPoints.get(uuid);
         } else{
             return 0.0;
         }
     }
-    public static void addPoint(UUID uuid, Double points){
-        playerPoints.putIfAbsent(uuid, 0.0d);
-        playerPoints.put(uuid, playerPoints.get(uuid) + points);
+    public static void addPoint(UUID uuid, Double questPoints){
+        playerQuestPoints.putIfAbsent(uuid, 0.0d);
+        playerQuestPoints.put(uuid, playerQuestPoints.get(uuid) + questPoints);
     }
     public static void setPoint(UUID uuid, Double points){
-        playerPoints.put(uuid, points);
+        playerQuestPoints.put(uuid, points);
     }
-    public static void removePoint(UUID uuid, Double points){
-        playerPoints.putIfAbsent(uuid, 0.0);
-        playerPoints.put(uuid, playerPoints.get(uuid) - points);
-        if(playerPoints.get(uuid) < 0){
-            playerPoints.put(uuid, 0d);
+    public static void removePoint(UUID uuid, Double questPoints){
+        playerQuestPoints.putIfAbsent(uuid, 0.0);
+        playerQuestPoints.put(uuid, playerQuestPoints.get(uuid) - questPoints);
+        if(playerQuestPoints.get(uuid) < 0){
+            playerQuestPoints.put(uuid, 0d);
         }
     }
     public static void clearPoint(UUID uuid){
-        playerPoints.putIfAbsent(uuid, 0.0);
-        playerPoints.remove(uuid);
+        playerQuestPoints.putIfAbsent(uuid, 0.0);
+        playerQuestPoints.remove(uuid);
     }
     public static Float getActivity(UUID uuid){
         if(!Objects.equals(activity.get(uuid),null)){
@@ -69,8 +69,7 @@ public final class points {
             activity.put(uuid,0.9f);
         }
     }
-
-    public static void calculatePointsMaxMoney(){
+    public static void calculateQuestPointsMaxMoney(){
         double moneys = 0.0;
         for(Player player : Bukkit.getServer().getOnlinePlayers()){
             if(!Objects.equals(landsAPI.getLandPlayer(player.getUniqueId()),null) && !player.isOp()){
@@ -80,7 +79,7 @@ public final class points {
                         totalLandChunks += land.getChunksAmount();
                     }
                 }
-                moneys += totalLandChunks * 3 * getActivity(player.getUniqueId());
+                moneys += totalLandChunks * 4 * getActivity(player.getUniqueId());
                 moneys += 10;
             }
         }
@@ -88,36 +87,37 @@ public final class points {
             maxMoney = moneys;
         }
     }
-    public static Double serverTotalPoints = 0.0;
+
+    public static Double serverTotalQuestPoints = 0.0;
     public static void calculatePoint(){
-        serverTotalPoints = 0.0;
+        serverTotalQuestPoints = 0.0;
         Bukkit.getLogger().info("moneys: " + maxMoney);
-        playerPoints.forEach((k,v) -> {
-            if(Objects.equals(v,null) || Bukkit.getPlayer(k).isOp()){
+        playerQuestPoints.forEach((k,v) -> {
+            if(Objects.equals(v,null)){
                 return;
             }
-            serverTotalPoints += pow(v, 0.5);
+            serverTotalQuestPoints += pow(v, 0.5);
         });
-        playerPoints.forEach((k,v) -> {
-            if(Objects.equals(v,null) || Bukkit.getPlayer(k).isOp()){
+        playerQuestPoints.forEach((k,v) -> {
+            if(Objects.equals(v,null)){
                 return;
             }
             Double moneyToAdd = 0d;
             DecimalFormat df = new DecimalFormat("#.##");
-            moneyToAdd = (pow(v, 0.5) / serverTotalPoints) * maxMoney;
+            moneyToAdd = (pow(v, 0.5) / serverTotalQuestPoints) * maxMoney;
             moneyToAdd = Double.valueOf(df.format(moneyToAdd));
-            Bukkit.getLogger().info(Bukkit.getOfflinePlayer(k).getName() + " has " + v  + " points, added " + moneyToAdd);
+            Bukkit.getLogger().info(Bukkit.getOfflinePlayer(k).getName() + " has " + v + " questPoints, added: " + moneyToAdd + " $ ");
             if(!Objects.equals(Bukkit.getPlayer(k),null)){
                 Bukkit.getPlayer(k).sendMessage(
                         Component.text()
-                                .append(Component.text("已獲得本日經驗點數獎勵: ").color(NamedTextColor.YELLOW))
+                                .append(Component.text("已獲得本日任務點數獎勵: ").color(NamedTextColor.YELLOW))
                                 .append(Component.text(moneyToAdd + " $").color(NamedTextColor.GOLD))
                 );
             }
-            economy.depositPlayer(Bukkit.getOfflinePlayer(k), (pow(v, 0.5) / serverTotalPoints) * maxMoney);
+            economy.depositPlayer(Bukkit.getOfflinePlayer(k), moneyToAdd);
         });
-        Bukkit.getLogger().info("serverTotalPoints: " + serverTotalPoints);
-        playerPoints.clear();
+        Bukkit.getLogger().info("serverTotalQuestPoints: " + serverTotalQuestPoints);
+        playerQuestPoints.clear();
         new BukkitRunnable() {
             @Override
             public void run() {
