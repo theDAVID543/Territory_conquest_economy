@@ -115,11 +115,10 @@ public class quest implements Listener {
             "trade",
             "trade",
             "trade",
-            "trade",
-            "trade",
             "mineOre",
             "mineOre",
             "mineOre",
+            "exploreBiome",
             "exploreBiome"
     );
     public static final List<Material> ores = Arrays.asList(
@@ -219,7 +218,8 @@ public class quest implements Listener {
         if(Objects.equals(todayQuest, "killEntity") && e.getEntity().getType().equals(todayType) && !Objects.equals(e.getEntity().getKiller(), null)){
             new BukkitRunnable(){
                 public void run(){
-                    if(e.getDroppedExp() > 0){
+                    EntityType type = e.getEntityType();
+                    if(e.getDroppedExp() > 0 || type.equals(EntityType.ALLAY) || type.equals(EntityType.VILLAGER) || type.equals(EntityType.BAT) || type.equals(EntityType.TADPOLE)){
                         questPoints.addPoint(Objects.requireNonNull(e.getEntity().getKiller()).getUniqueId(),1d);
                     }
                 }

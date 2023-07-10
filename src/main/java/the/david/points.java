@@ -21,7 +21,7 @@ public final class points {
     private static final Economy economy = Territory_conquest_economy.getEconomy();
     private static final LandsIntegration landsAPI = Territory_conquest_economy.landsAPI;
     private static final Map<UUID,Float> activity = new HashMap<>();
-    private static final Map<UUID,Double> playerPoints = new HashMap<>();
+    public static final Map<UUID,Double> playerPoints = new HashMap<>();
     public static Double maxMoney = 0.0;
     public static Double getPoint(UUID uuid){
         if(!Objects.equals(playerPoints.get(uuid),null)){
@@ -49,25 +49,13 @@ public final class points {
         playerPoints.remove(uuid);
     }
     public static Float getActivity(UUID uuid){
-        if(!Objects.equals(activity.get(uuid),null)){
-            return activity.get(uuid);
-        }else{
-            return 1f;
-        }
+        return questPoints.getActivity(uuid);
     }
     public static void addActivity(UUID uuid, Float d){
-        activity.putIfAbsent(uuid,1f);
-        activity.put(uuid, activity.get(uuid) + d);
-        if(activity.get(uuid) > 2){
-            activity.put(uuid,2f);
-        }
+        questPoints.addActivity(uuid, d);
     }
     public static void removeActivity(UUID uuid, Float d){
-        activity.putIfAbsent(uuid,1f);
-        activity.put(uuid, activity.get(uuid) - d);
-        if(activity.get(uuid) < 0.9){
-            activity.put(uuid,0.9f);
-        }
+        questPoints.removeActivity(uuid, d);
     }
 
     public static void calculatePointsMaxMoney(){
@@ -80,8 +68,8 @@ public final class points {
                         totalLandChunks += land.getChunksAmount();
                     }
                 }
-                moneys += totalLandChunks * 3 * getActivity(player.getUniqueId());
-                moneys += 10;
+                moneys += totalLandChunks * 2 * getActivity(player.getUniqueId());
+                moneys += 10 * getActivity(player.getUniqueId());
             }
         }
         if(moneys >= maxMoney){
@@ -93,13 +81,13 @@ public final class points {
         serverTotalPoints = 0.0;
         Bukkit.getLogger().info("moneys: " + maxMoney);
         playerPoints.forEach((k,v) -> {
-            if(Objects.equals(v,null) || Bukkit.getPlayer(k).isOp()){
+            if(Objects.equals(v,null) || Bukkit.getOfflinePlayer(k).isOp() || Objects.equals(v, 0d)){
                 return;
             }
             serverTotalPoints += pow(v, 0.5);
         });
         playerPoints.forEach((k,v) -> {
-            if(Objects.equals(v,null) || Bukkit.getPlayer(k).isOp()){
+            if(Objects.equals(v,null) || Bukkit.getOfflinePlayer(k).isOp() || Objects.equals(v, 0d)){
                 return;
             }
             Double moneyToAdd = 0d;
@@ -114,17 +102,11 @@ public final class points {
                                 .append(Component.text(moneyToAdd + " $").color(NamedTextColor.GOLD))
                 );
             }
-            economy.depositPlayer(Bukkit.getOfflinePlayer(k), (pow(v, 0.5) / serverTotalPoints) * maxMoney);
+            economy.depositPlayer(Bukkit.getOfflinePlayer(k), moneyToAdd);
         });
         Bukkit.getLogger().info("serverTotalPoints: " + serverTotalPoints);
         playerPoints.clear();
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                maxMoney = 0d;
-            }
-
-        }.runTaskLater(Territory_conquest_economy.instance, 1);
+        maxMoney = 0d;
 //        Set<UUID> ketSet = playerPoints.keySet();
 //        for(UUID uuid : ketSet){
 //            serverTotalPoints += pow(getPoint(uuid),0.5);

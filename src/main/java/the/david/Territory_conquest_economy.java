@@ -25,6 +25,7 @@ public final class Territory_conquest_economy extends JavaPlugin implements @Not
     private static Permission perms = null;
     private static Chat chat = null;
     public static long oldDayTime;
+    public static Integer ranTimes = 0;
     @Override
     public void onEnable() {
         // Plugin startup logic
@@ -41,6 +42,9 @@ public final class Territory_conquest_economy extends JavaPlugin implements @Not
             Bukkit.getPluginCommand("tce").setExecutor(new commandHandler());
         }
         Objects.requireNonNull(Bukkit.getPluginCommand("tce")).setTabCompleter(new commandHandler());
+        if (Bukkit.getPluginCommand("points") != null) {
+            Bukkit.getPluginCommand("points").setExecutor(new pointsCommand());
+        }
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             /*
              * We register the EventListener here, when PlaceholderAPI is installed.
@@ -59,12 +63,18 @@ public final class Territory_conquest_economy extends JavaPlugin implements @Not
         new BukkitRunnable() {
             @Override
             public void run() {
-                points.calculatePointsMaxMoney();
-                questPoints.calculateQuestPointsMaxMoney();
+                ranTimes += 1;
+                if (ranTimes >= 60) {
+                    points.calculatePointsMaxMoney();
+                    questPoints.calculateQuestPointsMaxMoney();
+                    ranTimes = 0;
+                }
                 if(Bukkit.getWorld("world").getTime() < oldDayTime){
                     points.calculatePoint();
                     questPoints.calculatePoint();
                     quest.randomQuest();
+                    points.calculatePointsMaxMoney();
+                    questPoints.calculateQuestPointsMaxMoney();
                 }
                 if(Objects.equals(quest.todayQuest,null)){
                     quest.randomQuest();

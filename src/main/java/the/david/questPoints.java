@@ -10,10 +10,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static java.lang.Math.pow;
 
@@ -21,8 +20,9 @@ public final class questPoints {
     private static final Economy economy = Territory_conquest_economy.getEconomy();
     private static final LandsIntegration landsAPI = Territory_conquest_economy.landsAPI;
     private static final Map<UUID,Float> activity = new HashMap<>();
-    private static final Map<UUID,Double> playerQuestPoints = new HashMap<>();
-    private static Double maxMoney = 0.0;
+    public static final Map<UUID,Double> playerQuestPoints = new HashMap<>();
+    public static Double maxMoney = 0.0;
+    private static Integer rantimes = 0;
     public static Double getPoint(UUID uuid){
         if(!Objects.equals(playerQuestPoints.get(uuid),null)){
             return playerQuestPoints.get(uuid);
@@ -79,8 +79,8 @@ public final class questPoints {
                         totalLandChunks += land.getChunksAmount();
                     }
                 }
-                moneys += totalLandChunks * 4 * getActivity(player.getUniqueId());
-                moneys += 10;
+                moneys += totalLandChunks * 3 * getActivity(player.getUniqueId());
+                moneys += 20 * getActivity(player.getUniqueId());
             }
         }
         if(moneys >= maxMoney){
@@ -93,13 +93,13 @@ public final class questPoints {
         serverTotalQuestPoints = 0.0;
         Bukkit.getLogger().info("moneys: " + maxMoney);
         playerQuestPoints.forEach((k,v) -> {
-            if(Objects.equals(v,null)){
+            if(Objects.equals(v,null) || Bukkit.getOfflinePlayer(k).isOp() || Objects.equals(v, 0d)){
                 return;
             }
             serverTotalQuestPoints += pow(v, 0.5);
         });
         playerQuestPoints.forEach((k,v) -> {
-            if(Objects.equals(v,null)){
+            if(Objects.equals(v,null) || Bukkit.getOfflinePlayer(k).isOp() || Objects.equals(v, 0d)){
                 return;
             }
             Double moneyToAdd = 0d;
@@ -117,14 +117,21 @@ public final class questPoints {
             economy.depositPlayer(Bukkit.getOfflinePlayer(k), moneyToAdd);
         });
         Bukkit.getLogger().info("serverTotalQuestPoints: " + serverTotalQuestPoints);
+        if(playerQuestPoints.size() >= 5){
+            Stream<Map.Entry<UUID,Double>> sorted =
+                    playerQuestPoints.entrySet().stream()
+                            .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()));
+            rantimes = 0;
+            sorted.forEach((entry) ->{
+                if(rantimes < playerQuestPoints.size()/2){
+                    addActivity(entry.getKey(), 0.05F);
+                    Bukkit.getLogger().info("addedActivity: " + Bukkit.getPlayer(entry.getKey()));
+                }
+                rantimes ++;
+            });
+        }
         playerQuestPoints.clear();
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                maxMoney = 0d;
-            }
-
-        }.runTaskLater(Territory_conquest_economy.instance, 1);
+        maxMoney = 0d;
 //        Set<UUID> ketSet = playerPoints.keySet();
 //        for(UUID uuid : ketSet){
 //            serverTotalPoints += pow(getPoint(uuid),0.5);
