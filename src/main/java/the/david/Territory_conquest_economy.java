@@ -73,8 +73,13 @@ public final class Territory_conquest_economy extends JavaPlugin implements @Not
                     points.calculatePoint();
                     questPoints.calculatePoint();
                     quest.randomQuest();
-                    points.calculatePointsMaxMoney();
-                    questPoints.calculateQuestPointsMaxMoney();
+                    new BukkitRunnable(){
+                        @Override
+                        public void run() {
+                            points.calculatePointsMaxMoney();
+                            questPoints.calculateQuestPointsMaxMoney();
+                        }
+                    }.runTaskLater(instance, 1);
                 }
                 if(Objects.equals(quest.todayQuest,null)){
                     quest.randomQuest();
