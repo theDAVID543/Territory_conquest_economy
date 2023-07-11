@@ -117,7 +117,7 @@ public final class questPoints {
             economy.depositPlayer(Bukkit.getOfflinePlayer(k), moneyToAdd);
         });
         Bukkit.getLogger().info("serverTotalQuestPoints: " + serverTotalQuestPoints);
-        if(playerQuestPoints.size() >= 5){
+        if(playerQuestPoints.size() >= 10){
             Stream<Map.Entry<UUID,Double>> sorted =
                     playerQuestPoints.entrySet().stream()
                             .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()));
