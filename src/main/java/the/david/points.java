@@ -71,7 +71,7 @@ public final class points {
                     }
                 }
                 playerLandMoney.put(player.getUniqueId(), (double) (totalLandChunks * 2 * getActivity(player.getUniqueId())));
-                moneys += 100 * getActivity(player.getUniqueId());
+                moneys += 40 * getActivity(player.getUniqueId());
             }
         }
         if(moneys >= maxMoney){

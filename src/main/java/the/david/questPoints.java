@@ -82,7 +82,7 @@ public final class questPoints {
                     }
                 }
                 playerLandMoney.put(player.getUniqueId(), (double) (totalLandChunks * 3 * getActivity(player.getUniqueId())));
-                moneys += 150 * getActivity(player.getUniqueId());
+                moneys += 60 * getActivity(player.getUniqueId());
             }
         }
         if(moneys >= maxMoney){
