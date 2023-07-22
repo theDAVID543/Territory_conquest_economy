@@ -13,7 +13,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 public final class Territory_conquest_economy extends JavaPlugin implements @NotNull Listener {
@@ -26,6 +30,7 @@ public final class Territory_conquest_economy extends JavaPlugin implements @Not
     private static Chat chat = null;
     public static long oldDayTime;
     public static Integer ranTimes = 0;
+    public static Integer oldDay;
     @Override
     public void onEnable() {
         // Plugin startup logic
@@ -70,16 +75,11 @@ public final class Territory_conquest_economy extends JavaPlugin implements @Not
                     ranTimes = 0;
                 }
                 if(Bukkit.getWorld("world").getTime() < oldDayTime){
+                    quest.randomQuest();
+                    points.calculatePointsMaxMoney();
+                    questPoints.calculateQuestPointsMaxMoney();
                     points.calculatePoint();
                     questPoints.calculatePoint();
-                    quest.randomQuest();
-                    new BukkitRunnable(){
-                        @Override
-                        public void run() {
-                            points.calculatePointsMaxMoney();
-                            questPoints.calculateQuestPointsMaxMoney();
-                        }
-                    }.runTaskLater(instance, 1);
                 }
                 if(Objects.equals(quest.todayQuest,null)){
                     quest.randomQuest();

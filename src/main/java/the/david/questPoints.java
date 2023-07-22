@@ -2,16 +2,15 @@ package the.david;
 
 import me.angeschossen.lands.api.LandsIntegration;
 import me.angeschossen.lands.api.land.Land;
+import me.angeschossen.lands.api.land.LandWorld;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.lang.Math.pow;
@@ -21,6 +20,8 @@ public final class questPoints {
     private static final LandsIntegration landsAPI = Territory_conquest_economy.landsAPI;
     private static final Map<UUID,Float> activity = new HashMap<>();
     public static final Map<UUID,Double> playerQuestPoints = new HashMap<>();
+    public static final Map<UUID, Double> playerCanAddLandMoney = new HashMap<>();
+    public static final Map<UUID, Double> playerLandMoney = new HashMap<>();
     public static Double maxMoney = 0.0;
     private static Integer rantimes = 0;
     public static Double getPoint(UUID uuid){
@@ -73,14 +74,15 @@ public final class questPoints {
         double moneys = 0.0;
         for(Player player : Bukkit.getServer().getOnlinePlayers()){
             if(!Objects.equals(landsAPI.getLandPlayer(player.getUniqueId()),null) && !player.isOp()){
+                playerLandMoney.put(player.getUniqueId(), 0d);
                 int totalLandChunks = 0;
                 for(Land land : landsAPI.getLandPlayer(player.getUniqueId()).getLands()){
                     if(land.getOwnerUID().equals(player.getUniqueId())){
                         totalLandChunks += land.getChunksAmount();
                     }
                 }
-                moneys += totalLandChunks * 3 * getActivity(player.getUniqueId());
-                moneys += 20 * getActivity(player.getUniqueId());
+                playerLandMoney.put(player.getUniqueId(), (double) (totalLandChunks * 3 * getActivity(player.getUniqueId())));
+                moneys += 150 * getActivity(player.getUniqueId());
             }
         }
         if(moneys >= maxMoney){
@@ -102,11 +104,18 @@ public final class questPoints {
             if(Objects.equals(v,null) || Bukkit.getOfflinePlayer(k).isOp() || Objects.equals(v, 0d)){
                 return;
             }
-            Double moneyToAdd = 0d;
             DecimalFormat df = new DecimalFormat("#.##");
-            moneyToAdd = (pow(v, 0.5) / serverTotalQuestPoints) * maxMoney;
+            double moneyToAdd = (pow(v, 0.5) / serverTotalQuestPoints) * maxMoney;
             moneyToAdd = Double.valueOf(df.format(moneyToAdd));
-            Bukkit.getLogger().info(Bukkit.getOfflinePlayer(k).getName() + " has " + v + " questPoints, added: " + moneyToAdd + " $ ");
+            double landMoneyToAdd = (pow(v, 0.5) / serverTotalQuestPoints) * playerLandMoney.get(k);
+            playerCanAddLandMoney.putIfAbsent(k,0d);
+            if(playerCanAddLandMoney.get(k) - landMoneyToAdd <= 0){
+                landMoneyToAdd = playerCanAddLandMoney.get(k);
+                playerCanAddLandMoney.put(k, 0d);
+            }else{
+                playerCanAddLandMoney.put(k, playerCanAddLandMoney.get(k) - landMoneyToAdd);
+            }
+            Bukkit.getLogger().info(Bukkit.getOfflinePlayer(k).getName() + " has " + v + " questPoints, added: " + moneyToAdd + " + " + landMoneyToAdd + " $ ");
             if(!Objects.equals(Bukkit.getPlayer(k),null)){
                 Bukkit.getPlayer(k).sendMessage(
                         Component.text()
@@ -114,7 +123,7 @@ public final class questPoints {
                                 .append(Component.text(moneyToAdd + " $").color(NamedTextColor.GOLD))
                 );
             }
-            economy.depositPlayer(Bukkit.getOfflinePlayer(k), moneyToAdd);
+            economy.depositPlayer(Bukkit.getOfflinePlayer(k), moneyToAdd + landMoneyToAdd);
         });
         Bukkit.getLogger().info("serverTotalQuestPoints: " + serverTotalQuestPoints);
         if(playerQuestPoints.size() >= 10){

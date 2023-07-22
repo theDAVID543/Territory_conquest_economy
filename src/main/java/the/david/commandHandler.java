@@ -115,7 +115,6 @@ public class commandHandler implements CommandExecutor, TabCompleter {
                         Bukkit.getPlayer(sender.getName()).getLocation().getChunk().getPersistentDataContainer().remove(quest.keyPlacedOre);
                     }
                 }
-
         }
         return false;
     }
@@ -132,6 +131,7 @@ public class commandHandler implements CommandExecutor, TabCompleter {
             completer.add("quest");
             completer.add("questpoints");
             completer.add("placedores");
+            completer.add("calculateLandCanAddMoney");
             return completer;
         }
         switch (args[0]) {

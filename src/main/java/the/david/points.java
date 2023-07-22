@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -22,6 +21,8 @@ public final class points {
     private static final LandsIntegration landsAPI = Territory_conquest_economy.landsAPI;
     private static final Map<UUID,Float> activity = new HashMap<>();
     public static final Map<UUID,Double> playerPoints = new HashMap<>();
+    public static final Map<UUID, Double> playerCanAddLandMoney = new HashMap<>();
+    public static final Map<UUID, Double> playerLandMoney = new HashMap<>();
     public static Double maxMoney = 0.0;
     public static Double getPoint(UUID uuid){
         if(!Objects.equals(playerPoints.get(uuid),null)){
@@ -62,20 +63,22 @@ public final class points {
         double moneys = 0.0;
         for(Player player : Bukkit.getServer().getOnlinePlayers()){
             if(!Objects.equals(landsAPI.getLandPlayer(player.getUniqueId()),null) && !player.isOp()){
+                playerLandMoney.put(player.getUniqueId(), 0d);
                 int totalLandChunks = 0;
                 for(Land land : landsAPI.getLandPlayer(player.getUniqueId()).getLands()){
                     if(land.getOwnerUID().equals(player.getUniqueId())){
                         totalLandChunks += land.getChunksAmount();
                     }
                 }
-                moneys += totalLandChunks * 2 * getActivity(player.getUniqueId());
-                moneys += 10 * getActivity(player.getUniqueId());
+                playerLandMoney.put(player.getUniqueId(), (double) (totalLandChunks * 2 * getActivity(player.getUniqueId())));
+                moneys += 100 * getActivity(player.getUniqueId());
             }
         }
         if(moneys >= maxMoney){
             maxMoney = moneys;
         }
     }
+
     public static Double serverTotalPoints = 0.0;
     public static void calculatePoint(){
         serverTotalPoints = 0.0;
@@ -90,11 +93,18 @@ public final class points {
             if(Objects.equals(v,null) || Bukkit.getOfflinePlayer(k).isOp() || Objects.equals(v, 0d)){
                 return;
             }
-            Double moneyToAdd = 0d;
             DecimalFormat df = new DecimalFormat("#.##");
-            moneyToAdd = (pow(v, 0.5) / serverTotalPoints) * maxMoney;
+            double moneyToAdd = (pow(v, 0.5) / serverTotalPoints) * maxMoney;
             moneyToAdd = Double.valueOf(df.format(moneyToAdd));
-            Bukkit.getLogger().info(Bukkit.getOfflinePlayer(k).getName() + " has " + v  + " points, added " + moneyToAdd);
+            double landMoneyToAdd = (pow(v, 0.5) / serverTotalPoints) * playerLandMoney.get(k);
+            playerCanAddLandMoney.putIfAbsent(k,0d);
+            if(playerCanAddLandMoney.get(k) - landMoneyToAdd <= 0){
+                landMoneyToAdd = playerCanAddLandMoney.get(k);
+                playerCanAddLandMoney.put(k, 0d);
+            }else{
+                playerCanAddLandMoney.put(k, playerCanAddLandMoney.get(k) - landMoneyToAdd);
+            }
+            Bukkit.getLogger().info(Bukkit.getOfflinePlayer(k).getName() + " has " + v + " points, added: " + moneyToAdd + " + " + landMoneyToAdd + " $ ");
             if(!Objects.equals(Bukkit.getPlayer(k),null)){
                 Bukkit.getPlayer(k).sendMessage(
                         Component.text()
@@ -102,7 +112,7 @@ public final class points {
                                 .append(Component.text(moneyToAdd + " $").color(NamedTextColor.GOLD))
                 );
             }
-            economy.depositPlayer(Bukkit.getOfflinePlayer(k), moneyToAdd);
+            economy.depositPlayer(Bukkit.getOfflinePlayer(k), moneyToAdd + landMoneyToAdd);
         });
         Bukkit.getLogger().info("serverTotalPoints: " + serverTotalPoints);
         playerPoints.clear();

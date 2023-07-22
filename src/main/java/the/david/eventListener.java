@@ -1,14 +1,21 @@
 package the.david;
 
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
+import me.angeschossen.lands.api.events.memberholder.MemberHolderUpkeepEvent;
+import me.angeschossen.lands.api.events.player.PlayerTaxEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.DecimalFormat;
+import java.util.Objects;
+import java.util.UUID;
 
 public class eventListener implements Listener {
     @EventHandler
@@ -40,5 +47,29 @@ public class eventListener implements Listener {
         }
         points.clearPoint(e.getPlayer().getUniqueId());
         questPoints.clearPoint(e.getPlayer().getUniqueId());
+    }
+//    @EventHandler
+//    public void onPlayerJoin(PlayerJoinEvent e){
+//        Player player = e.getPlayer();
+//        new BukkitRunnable(){
+//            @Override
+//            public void run() {
+//                if(!Objects.equals(questPoints.playerCanCalculate.get(player.getUniqueId()), false)){
+//                    questPoints.calculateLandCanAddMoney(player);
+//                    points.calculateLandCanAddMoney(player);
+//                    Bukkit.getLogger().info("calculating");
+//                }
+//            }
+//        }.runTaskLater(Territory_conquest_economy.instance, 10L);
+//
+//    }
+    @EventHandler
+    public void onLandsUpkeep(MemberHolderUpkeepEvent e){
+        UUID uuid = e.getMemberHolder().getOwnerUID();
+        points.playerCanAddLandMoney.putIfAbsent(uuid, 0d);
+        questPoints.playerCanAddLandMoney.putIfAbsent(uuid, 0d);
+        points.playerCanAddLandMoney.put(uuid, points.playerCanAddLandMoney.get(uuid) + e.getUpkeep());
+        questPoints.playerCanAddLandMoney.put(uuid, points.playerCanAddLandMoney.get(uuid) + e.getUpkeep());
+        Bukkit.getLogger().info(points.playerCanAddLandMoney + " " + questPoints.playerCanAddLandMoney);
     }
 }

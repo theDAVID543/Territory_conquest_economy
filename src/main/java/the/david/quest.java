@@ -80,7 +80,6 @@ public class quest implements Listener {
             EntityType.SHEEP,
             EntityType.SHULKER,
             EntityType.SILVERFISH,
-            EntityType.SKELETON_HORSE,
             EntityType.SLIME,
             EntityType.SPIDER,
             EntityType.STRAY,
@@ -357,20 +356,21 @@ public class quest implements Listener {
                     if(!todayQuest.equals("exploreBiome")){
                         playerBiomes.clear();
                         this.cancel();
-                    }
-                    for(Player player : Bukkit.getOnlinePlayers()){
-                        UUID uuid = player.getUniqueId();
-                        Set<Biome> biomes = new HashSet<>();
-                        if(Objects.equals(playerBiomes.get(uuid),null)) {
-                            questPoints.addPoint(uuid, 1d);
-                        }else if(!playerBiomes.get(uuid).isEmpty()){
-                            biomes = playerBiomes.get(uuid);
-                            if(!biomes.contains(player.getLocation().getBlock().getBiome())){
-                                questPoints.addPoint(uuid, 1d);
+                    }else{
+                        for(Player player : Bukkit.getOnlinePlayers()){
+                            UUID uuid = player.getUniqueId();
+                            Set<Biome> biomes = new HashSet<>();
+                            if(Objects.equals(playerBiomes.get(uuid),null)) {
+                                questPoints.addPoint(uuid, 0d);
+                            }else if(!playerBiomes.get(uuid).isEmpty()){
+                                biomes = playerBiomes.get(uuid);
+                                if(!biomes.contains(player.getLocation().getBlock().getBiome())){
+                                    questPoints.addPoint(uuid, 1d);
+                                }
                             }
+                            biomes.add(player.getLocation().getBlock().getBiome());
+                            playerBiomes.put(uuid, biomes);
                         }
-                        biomes.add(player.getLocation().getBlock().getBiome());
-                        playerBiomes.put(uuid, biomes);
                     }
                 }
             }.runTaskTimer(Territory_conquest_economy.instance,0,20*5);
